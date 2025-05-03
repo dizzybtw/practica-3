@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Metadatos sobre el tipo de documento y la codificación -->
+    <meta charset="UTF-8">  
+    <!-- Establece la vista para dispositivos móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página -->
+    <title>Clima en tu Ciudad</title>
+    
+    <style>
+        /* Estilo básico de la página */
+        body {
+            font-family: Arial, sans-serif; /* Define la fuente de la página */
+            padding: 20px; /* Añade un padding alrededor del contenido */
+        }
+        
+        /* Estilo para el botón de obtener clima */
+        button {
+            padding: 10px 20px; /* Espaciado interno del botón */
+            background-color: #007BFF; /* Color de fondo azul */
+            color: white; /* Color del texto en el botón */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Bordes redondeados */
+            cursor: pointer; /* Cambia el cursor al pasar por encima */
+        }
+        
+        /* Estilo cuando se pasa el mouse sobre el botón */
+        button:hover {
+            background-color: #0056b3; /* Cambia el color de fondo al hacer hover */
+        }
+        
+        /* Estilo para el div de resultados */
+        .result {
+            margin-top: 20px; /* Margen superior para separar los resultados */
+        }
+        
+        /* Estilo para los encabezados dentro del div de resultados */
+        .result h2 {
+            color: #333; /* Color del encabezado */
+        }
+        
+        /* Estilo para los párrafos dentro del div de resultados */
+        .result p {
+            font-size: 18px; /* Tamaño de fuente para los párrafos */
+        }
+    </style>
+</head>
+<body>
+    <!-- Título principal de la página -->
+    <h1>Consulta el Clima Actual</h1>
+    
+    <!-- Instrucción para el usuario -->
+    <p>Introduce el nombre de una ciudad y presiona "Obtener Clima" para ver el clima actual.</p>
+    
+    <!-- Campo de entrada para la ciudad -->
+    <input type="text" id="city" placeholder="Ciudad">
+    
+    <!-- Botón que activa la consulta del clima -->
+    <button id="getWeather">Obtener Clima</button>
+
+    <!-- Div para mostrar el resultado del clima -->
+    <div id="result" class="result"></div>
+
+    <script>
+        // Clave API de OpenWeather (debes remplazarla con tu propia clave)
+        const apiKey = "21267315b5235b6720fec4e9dbe44840"; 
+
+        // Evento que se activa cuando el usuario hace clic en el botón
+        document.getElementById("getWeather").addEventListener("click", function() {
+            // Obtiene el valor de la ciudad ingresada por el usuario
+            const city = document.getElementById("city").value;
+            
+            // Verifica si el usuario ha ingresado una ciudad
+            if (!city) {
+                alert("Por favor, ingresa el nombre de una ciudad.");
+                return; // Si no se ingresa una ciudad, se detiene la ejecución
+            }
+
+            // Construcción de la URL para la API de OpenWeather, usando la ciudad y la clave API
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&lang=es&units=metric`;
+
+            // Llamada a la API utilizando fetch, que es asincrónica
+            fetch(url)
+                .then(response => response.json())  // Convierte la respuesta de la API a formato JSON
+                .then(data => {                      // Este bloque se ejecuta cuando los datos están listos
+                    if (data.cod === "404") { // Verifica si la ciudad no fue encontrada
+                        // Si la ciudad no fue encontrada, muestra un mensaje de error
+                        document.getElementById("result").innerHTML = "<p>Ciudad no encontrada.</p>";
+                    } else {
+                        // Si la ciudad es válida, extraemos los datos del clima
+                        const weather = data.weather[0]; // Obtiene la descripción del clima (soleado, nublado, etc.)
+                        const main = data.main;           // Obtiene los datos principales como temperatura y humedad
+
+                        // Genera el HTML que se mostrará en la página con los datos obtenidos
+                        const resultHtml = `
+                            <h2>Clima en ${data.name}, ${data.sys.country}</h2>
+                            <p><strong>Descripción:</strong> ${weather.description}</p>
+                            <p><strong>Temperatura:</strong> ${main.temp}°C</p>
+                            <p><strong>Humedad:</strong> ${main.humidity}%</p>
+                            <p><strong>Presión atmosférica:</strong> ${main.pressure} hPa</p>
+                        `;
+
+                        // Inserta el HTML generado en el div con el id "result"
+                        document.getElementById("result").innerHTML = resultHtml;
+                    }
+                })
+                .catch(error => {                    // Manejo de errores si algo sale mal
+                    console.error("Error:", error); // Imprime el error en la consola
+                    alert("Hubo un error al obtener los datos."); // Muestra una alerta al usuario
+                });
+        });
+    </script>
+</body>
+</html>
